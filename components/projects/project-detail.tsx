@@ -2,11 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { getProject } from "@/app/actions/projects";
+import { getVideosByProject } from "@/app/actions/videos";
 import { ProjectEditForm } from "@/components/projects/project-edit-form";
+import { VideosList } from "@/components/videos/videos-list";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { type Project } from "@/lib/types/project";
+import { type Video } from "@/lib/types/video";
 import {
   Calendar,
   ExternalLink,
@@ -14,6 +17,8 @@ import {
   Globe,
   ArrowLeft,
   Loader2,
+  Video as VideoIcon,
+  Plus,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -25,7 +30,9 @@ interface ProjectDetailProps {
 export function ProjectDetail({ projectId }: ProjectDetailProps) {
   const router = useRouter();
   const [project, setProject] = useState<Project | null>(null);
+  const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
+  const [videosLoading, setVideosLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
 
@@ -44,13 +51,30 @@ export function ProjectDetail({ projectId }: ProjectDetailProps) {
     setLoading(false);
   };
 
+  const loadVideos = async () => {
+    setVideosLoading(true);
+
+    const result = await getVideosByProject({ project_id: projectId });
+
+    if (result.success) {
+      setVideos(result.data || []);
+    }
+
+    setVideosLoading(false);
+  };
+
   useEffect(() => {
     loadProject();
+    loadVideos();
   }, [projectId]);
 
   const handleEditSuccess = () => {
     setIsEditing(false);
     loadProject();
+  };
+
+  const handleVideoRefresh = () => {
+    loadVideos();
   };
 
   const formatDate = (dateString: string) => {
@@ -205,6 +229,42 @@ export function ProjectDetail({ projectId }: ProjectDetailProps) {
                   <p className="font-mono text-sm">{project.user_id}</p>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <VideoIcon className="h-5 w-5" />
+                  Project Videos
+                  {!videosLoading && (
+                    <Badge variant="secondary">{videos.length}</Badge>
+                  )}
+                </CardTitle>
+                <Button asChild size="sm">
+                  <Link href={`/projects/${projectId}/upload`}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Upload Video
+                  </Link>
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {videosLoading ? (
+                <div className="text-center py-8">
+                  <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+                  <p className="text-muted-foreground">Loading videos...</p>
+                </div>
+              ) : (
+                <VideosList
+                  videos={videos}
+                  showProject={false}
+                  showAddButton={true}
+                  projectId={projectId}
+                  onRefresh={handleVideoRefresh}
+                />
+              )}
             </CardContent>
           </Card>
         </div>

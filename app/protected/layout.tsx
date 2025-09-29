@@ -4,7 +4,7 @@ import { ThemeSwitcher } from "@/components/theme-switcher";
 import { hasEnvVars } from "@/lib/utils";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { FolderOpen } from "lucide-react";
+import { FolderOpen, Video } from "lucide-react";
 
 export default function ProtectedLayout({
   children,
@@ -24,6 +24,12 @@ export default function ProtectedLayout({
                 <Button variant="ghost" size="sm">
                   <FolderOpen className="h-4 w-4 mr-2" />
                   Projects
+                </Button>
+              </Link>
+              <Link href="/videos">
+                <Button variant="ghost" size="sm">
+                  <Video className="h-4 w-4 mr-2" />
+                  Videos
                 </Button>
               </Link>
             </div>

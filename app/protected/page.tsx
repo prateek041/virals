@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
-import { InfoIcon, FolderOpen, Plus } from "lucide-react";
+import { InfoIcon, FolderOpen, Plus, Video } from "lucide-react";
 import { FetchDataSteps } from "@/components/tutorial/fetch-data-steps";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,7 +18,7 @@ export default async function ProtectedPage() {
   return (
     <div className="flex-1 w-full flex flex-col gap-12">
       <h2 className="font-bold text-2xl mb-4">Quick Actions</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -33,6 +33,23 @@ export default async function ProtectedPage() {
             </p>
             <Link href="/projects">
               <Button className="w-full">View Projects</Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Video className="h-5 w-5" />
+              Manage Videos
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground mb-4">
+              Upload, manage, and transcribe videos for your projects.
+            </p>
+            <Link href="/videos">
+              <Button className="w-full">View Videos</Button>
             </Link>
           </CardContent>
         </Card>
