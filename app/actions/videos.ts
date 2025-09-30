@@ -22,12 +22,98 @@ export type ActionResult<T = any> = {
   error?: string;
 };
 
+export async function transcribeVideo(uniqueId: string): Promise<void> {
+  try {
+    const supabase = await createClient();
+
+    console.log("getting this video", uniqueId);
+
+    // Check authentication
+    const { data: userData, error: authError } = await supabase.auth.getUser();
+    if (authError || !userData?.user) {
+      console.error("Authentication required for transcribing video");
+      return;
+    }
+
+    // Fetch the video to ensure it exists
+    const { data: video, error: videoError } = await supabase
+      .from("videos")
+      .select("*")
+      .eq("storage_path", uniqueId)
+      .single();
+
+    if (videoError || !video) {
+      console.log("Video not found or access denied", videoError);
+      // return { success: false, error: "Video not found or access denied" };
+    }
+
+    const { error } = await supabase
+      .from("videos")
+      .update({
+        deepgram_request_id: "your-deepgram-request-id",
+        status: "transcribing",
+      })
+      .eq("storage_path", uniqueId);
+
+    if (error) {
+      console.error("Error updating video status:", error);
+      // return { success: false, error: "Failed to update video status" };
+    }
+
+    const publicUrlResponse = await getVideoPublicUrl(uniqueId);
+    const callbackUrl =
+      "https://9f3bb8823277.ngrok-free.app/api/deepgram/callback";
+    const url = "https://api.deepgram.com/v1/listen?callback=" + callbackUrl;
+    const apiKey = process.env.DEEPGRAM_API_KEY;
+
+    console.log("the url is", url);
+    console.log("publicUrlResponse", publicUrlResponse.data?.publicUrl);
+
+    // Define the request data object
+    const data = {
+      url: publicUrlResponse.data?.publicUrl,
+    };
+
+    // Define the request headers object
+    const headers = {
+      Accept: "application/json",
+      Authorization: `Token ${apiKey}`,
+      "Content-Type": "application/json",
+    };
+
+    // Make the POST request using fetch API
+    fetch(url, {
+      method: "POST",
+      headers: headers, // Pass the headers object
+      body: JSON.stringify(data), // Convert data object to JSON string
+    })
+      .then((response) => response.json()) // Parse the JSON response
+      .then((data) => {
+        console.log('data from deepgram"', data); // Handle the parsed data
+      })
+      .catch((error) => {
+        console.error("Error:", error); // Handle errors
+      });
+
+    // if (!response.ok) {
+    //   const errorData = await response.json();
+    //   console.error(
+    //     "Failed to initiate transcription:",
+    //     errorData.error || response.statusText
+    //   );
+    // }
+  } catch (error) {
+    console.error("Error in transcribeVideo:", error);
+  }
+}
+
 /**
  * Get public URL for a video file from Supabase Storage
  */
 export async function getVideoPublicUrl(
   storagePath: string
 ): Promise<ActionResult<{ publicUrl: string }>> {
+  console.log("getting public url for", storagePath);
   try {
     const supabase = await createClient();
 

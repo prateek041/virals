@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useTransition, useRef } from "react";
+import { useState, useTransition, useRef, useEffect } from "react";
 import {
-  createBucketIfnotExists,
   createVideo,
   createVideoWithFile,
+  transcribeVideo,
 } from "@/app/actions/videos";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -59,6 +59,12 @@ export function VideoUploadForm({
     transcript: null,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const fetchData = async () => {
+    const response = await transcribeVideo(
+      "videos/78d23882-a5f2-4687-92b9-a3d97fa7ac4a/1759225047588_kcubgnibzp9.MOV"
+    );
+  };
 
   const handleCancel = () => {
     if (onCancel) {
@@ -207,6 +213,10 @@ export function VideoUploadForm({
               submit: result.error || "Failed to create video record",
             });
           }
+
+          // Start transcription after successful upload and record creation
+          // TODO: In production, consider queuing this task instead.
+          await transcribeVideo(uploadData.path);
         } catch (error) {
           setErrors({ submit: "An unexpected error occurred" });
         }
@@ -241,6 +251,15 @@ export function VideoUploadForm({
           <Upload className="h-5 w-5" />
           Upload Video
         </CardTitle>
+
+        <Button
+          onClick={fetchData}
+          variant="ghost"
+          size="sm"
+          className="ml-auto"
+        >
+          Check
+        </Button>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
