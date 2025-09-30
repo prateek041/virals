@@ -15,7 +15,7 @@ interface TranscriptPageProps {
 
 export default async function TranscriptPage({ params }: TranscriptPageProps) {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen ">
       <div className="container mx-auto px-4 py-8">
         <Suspense fallback={<TranscriptPageSkeleton />}>
           <TranscriptContent videoId={params.id} />

@@ -1,12 +1,12 @@
 import { ThemeSwitcher } from "@/components/theme-switcher";
 
-export default function ProjectsLayout({
+export default function VideoLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen">
+    <div className="">
       {children}
       <footer className="w-full flex items-center justify-center border-t mx-auto text-center text-xs gap-8 py-16">
         <p>

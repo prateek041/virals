@@ -6,7 +6,7 @@ import { Video, AlertCircle } from "lucide-react";
 
 export default async function VideosPage() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="h-full">
       <div className="container mx-auto px-4 py-8">
         <Suspense fallback={<VideosPageSkeleton />}>
           <VideosContent />
@@ -21,7 +21,7 @@ async function VideosContent() {
 
   if (!result.success) {
     return (
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl h-full mx-auto">
         <Card className="border-red-200">
           <CardContent className="p-6">
             <div className="flex items-center gap-3 text-red-600">
