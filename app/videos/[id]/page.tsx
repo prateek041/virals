@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { getVideoById } from "@/app/actions/videos";
-import { VideoDetail } from "@/components/videos/video-detail";
+import { VideoPlayerWithTranscript } from "@/components/videos/video-player-with-transcript";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Video, AlertCircle, ArrowLeft } from "lucide-react";
@@ -75,7 +75,7 @@ async function VideoContent({ videoId }: { videoId: string }) {
         </Button>
       </div>
 
-      <VideoDetail video={result.data!} />
+      <VideoPlayerWithTranscript video={result.data!} />
     </div>
   );
 }

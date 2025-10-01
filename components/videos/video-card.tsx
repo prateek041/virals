@@ -178,7 +178,7 @@ export function VideoCard({
               {getStatusIcon(video.status)}
               <span className="ml-1">{video.status}</span>
             </Badge>
-            {video.transcript && (
+            {video.transcript_text && (
               <Badge variant="outline">
                 <FileText className="h-3 w-3 mr-1" />
                 Transcript Available
