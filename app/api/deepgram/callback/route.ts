@@ -1,16 +1,23 @@
-export const runtime = "edge"; // optional: 'nodejs' or 'edge'
+import { updateTranscript } from "@/app/actions/videos";
 
+export const runtime = "edge";
+
+/**
+ * Handle POST requests from Deepgram webhook
+ * @param request Request object from Deepgram webhook
+ * @returns Response indicating success or failure
+ */
 export async function POST(request: Request) {
-  console.log("Webhook received");
+  try {
+    const data = await request.json();
+    const requestId = data?.metadata.request_id;
+    const transcriptText = data?.results.channels[0].alternatives[0].transcript;
+    const transcriptData = data?.results.channels[0].alternatives[0].words;
 
-  const data = await request.json();
-  console.log(
-    "transcript is",
-    data?.results.channels[0].alternatives[0].transcript
-  );
+    await updateTranscript(requestId, transcriptText, transcriptData);
 
-  console.log("words are", data?.results.channels[0].alternatives[0].words);
-  console.log("metadata is", data?.metadata.request_id);
-
-  return new Response("ok", { status: 200 });
+    return new Response("ok", { status: 200 });
+  } catch (error) {
+    return new Response("error", { status: 500 });
+  }
 }

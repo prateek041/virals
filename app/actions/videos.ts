@@ -22,6 +22,41 @@ export type ActionResult<T = any> = {
   error?: string;
 };
 
+export type WordTimeStamps = {
+  word: string;
+  start: number;
+  end: number;
+  confidence: number;
+};
+
+export async function updateTranscript(
+  requestId: string,
+  transcriptText: string,
+  transcriptData: WordTimeStamps[]
+): Promise<ActionResult<void>> {
+  try {
+    const supabase = await createClient();
+
+    const { error } = await supabase
+      .from("videos")
+      .update({
+        transcript_text: transcriptText,
+        transcript_data_full: transcriptData,
+        status: "transcribed",
+      })
+      .eq("deepgram_request_id", requestId);
+
+    if (error) {
+      console.error("Error updating transcript:", error);
+      return { success: false, error: "Failed to update transcript" };
+    }
+
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error as string };
+  }
+}
+
 export async function transcribeVideo(uniqueId: string): Promise<void> {
   try {
     const supabase = await createClient();
@@ -47,19 +82,6 @@ export async function transcribeVideo(uniqueId: string): Promise<void> {
       // return { success: false, error: "Video not found or access denied" };
     }
 
-    const { error } = await supabase
-      .from("videos")
-      .update({
-        deepgram_request_id: "your-deepgram-request-id",
-        status: "transcribing",
-      })
-      .eq("storage_path", uniqueId);
-
-    if (error) {
-      console.error("Error updating video status:", error);
-      // return { success: false, error: "Failed to update video status" };
-    }
-
     const publicUrlResponse = await getVideoPublicUrl(uniqueId);
     const callbackUrl =
       "https://9f3bb8823277.ngrok-free.app/api/deepgram/callback";
@@ -81,27 +103,30 @@ export async function transcribeVideo(uniqueId: string): Promise<void> {
       "Content-Type": "application/json",
     };
 
-    // Make the POST request using fetch API
-    fetch(url, {
-      method: "POST",
-      headers: headers, // Pass the headers object
-      body: JSON.stringify(data), // Convert data object to JSON string
-    })
-      .then((response) => response.json()) // Parse the JSON response
-      .then((data) => {
-        console.log('data from deepgram"', data); // Handle the parsed data
-      })
-      .catch((error) => {
-        console.error("Error:", error); // Handle errors
-      });
+    // Get the timestamped transcript of the video clip, to be saved
+    // in the database later on.
+    // TODO: Handle errors and loading states
 
-    // if (!response.ok) {
-    //   const errorData = await response.json();
-    //   console.error(
-    //     "Failed to initiate transcription:",
-    //     errorData.error || response.statusText
-    //   );
-    // }
+    const response = await fetch(url, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(data),
+    });
+    const responseData = await response.json();
+    const requestId = responseData.request_id;
+
+    const { error } = await supabase
+      .from("videos")
+      .update({
+        deepgram_request_id: requestId,
+        status: "transcribing",
+      })
+      .eq("storage_path", uniqueId);
+
+    if (error) {
+      console.error("Error updating video status:", error);
+      // return { success: false, error: "Failed to update video status" };
+    }
   } catch (error) {
     console.error("Error in transcribeVideo:", error);
   }

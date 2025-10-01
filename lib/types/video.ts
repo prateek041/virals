@@ -6,7 +6,8 @@ export interface Video {
   project_id: string;
   storage_path: string;
   status: "uploaded" | "transcribing" | "transcribed" | "error";
-  transcript: any | null; // JSONB field - can be any JSON structure
+  transcript_text: any | null; // JSONB field - can be any JSON structure
+  transcript_data_full: any | null; // JSONB field - full transcript data
   created_at: string;
 }
 

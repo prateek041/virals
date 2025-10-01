@@ -84,27 +84,29 @@ export function VideoDetail({ video, onUpdate }: VideoDetailProps) {
   };
 
   const getTranscriptText = (): string => {
-    if (!video.transcript) return "";
+    if (!video.transcript_text) return "";
 
     try {
       // Handle Deepgram format
       if (
-        video.transcript.results?.channels?.[0]?.alternatives?.[0]?.transcript
+        video.transcript_text.results?.channels?.[0]?.alternatives?.[0]
+          ?.transcript
       ) {
-        return video.transcript.results.channels[0].alternatives[0].transcript;
+        return video.transcript_text.results.channels[0].alternatives[0]
+          .transcript;
       }
 
       // Handle simple text format
-      if (typeof video.transcript === "string") {
-        return video.transcript;
+      if (typeof video.transcript_text === "string") {
+        return video.transcript_text;
       }
 
       // Handle other possible formats
-      if (video.transcript.transcript) {
-        return video.transcript.transcript;
+      if (video.transcript_text.transcript) {
+        return video.transcript_text.transcript;
       }
 
-      return JSON.stringify(video.transcript, null, 2);
+      return JSON.stringify(video.transcript_text, null, 2);
     } catch (error) {
       return "Error parsing transcript";
     }
@@ -148,9 +150,9 @@ export function VideoDetail({ video, onUpdate }: VideoDetailProps) {
   };
 
   const getTranscriptMetadata = () => {
-    if (!video.transcript?.metadata) return null;
+    if (!video.transcript_text) return null;
 
-    const metadata = video.transcript.metadata;
+    const metadata = video.transcript_text;
     return {
       duration: metadata.duration ? formatDuration(metadata.duration) : null,
       channels: metadata.channels,
@@ -240,7 +242,7 @@ export function VideoDetail({ video, onUpdate }: VideoDetailProps) {
               <FileText className="h-5 w-5" />
               Transcript
             </CardTitle>
-            {video.transcript && (
+            {video.transcript_text && (
               <div className="flex gap-2">
                 <Button
                   variant="outline"
@@ -268,7 +270,7 @@ export function VideoDetail({ video, onUpdate }: VideoDetailProps) {
           </div>
         </CardHeader>
         <CardContent>
-          {!video.transcript ? (
+          {!video.transcript_text ? (
             <div className="text-center py-8 text-muted-foreground">
               <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
               <p className="mb-2">No transcript available</p>
@@ -338,7 +340,7 @@ export function VideoDetail({ video, onUpdate }: VideoDetailProps) {
               })()}
 
               {/* Transcript Text */}
-              <div className="border rounded-lg p-4 bg-white">
+              <div className="border rounded-lg p-4">
                 <div className="prose max-w-none">
                   <p className="text-sm leading-relaxed whitespace-pre-wrap">
                     {showFullTranscript
